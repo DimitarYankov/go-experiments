@@ -2,7 +2,6 @@ package diagnostics
 
 import (
   "fmt"
-  "log"
   "net/http"
 
   "github.com/gorilla/mux"
