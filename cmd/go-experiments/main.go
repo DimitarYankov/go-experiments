@@ -10,6 +10,12 @@ import (
   "github.com/DimitarYankov/go-experiments/internal/diagnostics"
 )
 
+type serverConf struct{
+  port string
+  router http.Handler
+  name string
+}
+
 func main() {
    log.Print("Starting the application... ")
 
@@ -17,44 +23,53 @@ func main() {
    if (len(blPort) == 0) {
      log.Fatal("The app port should be set")
    }
+   router := mux.NewRouter()
+   router.HandleFunc("/", hello)
+
    diagnosticPort := os.Getenv("DIAG_PORT")
    if (len(diagnosticPort) == 0) {
      log.Fatal("The daignostic port should be set")
    }
-   router := mux.NewRouter()
-   router.HandleFunc("/", hello)
+   diagnostics := diagnostics.NewDiagnostics()
 
    possibleErrors := make(chan error, 2)
+   configurations := []serverConf{
+     {
+       port: blPort,
+       router: router,
+       name: "application server",
+     },
+     {
+       port: diagnosticPort,
+       router: diagnostics,
+       name: "diagnostic server",
+     },
+   }
 
-   go func () {
-     log.Print("The app server is preparing to handle connections...")
-     server := &http.Server{
-       Addr: ":"+blPort,
-       Handler: router,
-     }
-     err := server.ListenAndServe()
-     if (err != nil) {
-       possibleErrors <- err
-     }
-   }()
+   servers := make([]*http.Server, 2)
 
-   go func () {
-     diagnostics := diagnostics.NewDiagnostics()
-     log.Print("The diagnostic server is preparing to handle connections...")
-     diagnosticsServer := &http.Server{
-       Addr: ":"+diagnosticPort,
-       Handler: diagnostics,
-     }
-     err := diagnosticsServer.ListenAndServe()
-     if (err != nil) {
-       possibleErrors <- err
-     }
-   }()
+   for i, c := range configurations {
+     go func (conf serverConf, i int) {
+       log.Printf("The %s is preparing to handle connections...", conf.name)
+       servers[i] = &http.Server{
+         Addr: ":"+conf.port,
+         Handler: conf.router,
+       }
+       err := servers[i].ListenAndServe()
+       if (err != nil) {
+         possibleErrors <- err
+       }
+     }(c, i)
+   }
 
    select {
    case err := <-possibleErrors:
+     // for _, s := range servers {
+     //   // context.Background()
+     //   // s.Shutdown()
+     // }
      log.Fatal(err)
-     
+
    }
 
 }
