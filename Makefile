@@ -2,7 +2,7 @@
 GOOS?=linux
 GOARCH?=amd64
 
-PROJECT?=github.com/dimitaryankov/go-experiments
+PROJECT?=github.com/DimitarYankov/go-experiments
 BUILD_PATH?=cmd/go-experiments
 APP?=go-experiments
 
