@@ -24,22 +24,39 @@ func main() {
    router := mux.NewRouter()
    router.HandleFunc("/", hello)
 
+   possibleErrors := make(chan error, 2)
+
    go func () {
      log.Print("The app server is preparing to handle connections...")
-     err := http.ListenAndServe(":"+blPort, router)
-     if err != nil {
-       log.Fatal(err)
+     server := &http.Server{
+       Addr: ":"+blPort,
+       Handler: router,
+     }
+     err := server.ListenAndServe()
+     if (err != nil) {
+       possibleErrors <- err
      }
    }()
 
+   go func () {
+     diagnostics := diagnostics.NewDiagnostics()
+     log.Print("The diagnostic server is preparing to handle connections...")
+     diagnosticsServer := &http.Server{
+       Addr: ":"+diagnosticPort,
+       Handler: diagnostics,
+     }
+     err := diagnosticsServer.ListenAndServe()
+     if (err != nil) {
+       possibleErrors <- err
+     }
+   }()
 
-   diagnostics := diagnostics.NewDiagnostics()
-   log.Print("The diagnostic server is preparing to handle connections...")
-   err := http.ListenAndServe(":"+diagnosticPort, diagnostics)
-   if err != nil {
-
+   select {
+   case err := <-possibleErrors:
      log.Fatal(err)
+     
    }
+
 }
 
 func hello(w http.ResponseWriter, r *http.Request) {
