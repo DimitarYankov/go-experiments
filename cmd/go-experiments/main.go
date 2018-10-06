@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/dimitaryankov/go-experiments/internal/diagnostics"
+	"github.com/DimitarYankov/go-experiments/internal/diagnostics"
 	"github.com/gorilla/mux"
 )
 
