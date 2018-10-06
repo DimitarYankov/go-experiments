@@ -1,4 +1,4 @@
-module github.com/DimitarYankov/go-experiments
+module github.com/dimitaryankov/go-experiments
 
 require (
 	github.com/gorilla/context v1.1.1 // indirect
