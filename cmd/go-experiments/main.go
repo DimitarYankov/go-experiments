@@ -17,8 +17,8 @@ func main() {
    if (len(blPort) == 0) {
      log.Fatal("The app port should be set")
    }
-   daignosticPort := os.Getenv("DIAG_PORT")
-   if (len(daignosticPort) == 0) {
+   diagnosticPort := os.Getenv("DIAG_PORT")
+   if (len(diagnosticPort) == 0) {
      log.Fatal("The daignostic port should be set")
    }
    router := mux.NewRouter()
@@ -32,7 +32,7 @@ func main() {
    }()
 
    diagnostics := diagnostics.NewDiagnostics()
-   err := http.ListenAndServe(":"+daignosticPort, diagnostics)
+   err := http.ListenAndServe(":"+diagnosticPort, diagnostics)
    if err != nil {
      log.Fatal(err)
    }
