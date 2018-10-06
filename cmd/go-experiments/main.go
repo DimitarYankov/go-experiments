@@ -32,11 +32,9 @@ func main() {
 	if len(diagPort) == 0 {
 		log.Fatal("The diagnostics port should be set")
 	}
-
+	diagnostics := diagnostics.NewDiagnostics()
 	router := mux.NewRouter()
 	router.HandleFunc("/", hello)
-
-	diagnostics := diagnostics.NewDiagnostics()
 
 	possibleErrors := make(chan error, 2)
 
