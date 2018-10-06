@@ -1,11 +1,12 @@
 package main
 
 import (
+  "os"
   "log"
   "fmt"
+  "time"
+  "context"
   "net/http"
-  "os"
-
   "github.com/gorilla/mux"
   "github.com/DimitarYankov/go-experiments/internal/diagnostics"
 )
@@ -64,10 +65,17 @@ func main() {
 
    select {
    case err := <-possibleErrors:
-     // for _, s := range servers {
-     //   // context.Background()
-     //   // s.Shutdown()
-     // }
+     for _, s := range servers {
+       timeout := 5 * time.Second
+       log.Printf("\nShutdown with timeout: %s\n", timeout)
+       ctx, cancel := context.WithTimeout(context.Background(), timeout)
+       defer cancel()
+       customError := s.Shutdown(ctx)
+       if customError != nil {
+         fmt.Println(customError)
+       }
+       log.Printf("Server gracefully stopped")
+     }
      log.Fatal(err)
 
    }
