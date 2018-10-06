@@ -25,19 +25,24 @@ func main() {
    router.HandleFunc("/", hello)
 
    go func () {
+     log.Print("The app server is preparing to handle connections...")
      err := http.ListenAndServe(":"+blPort, router)
      if err != nil {
        log.Fatal(err)
      }
    }()
 
+
    diagnostics := diagnostics.NewDiagnostics()
+   log.Print("The diagnostic server is preparing to handle connections...")
    err := http.ListenAndServe(":"+diagnosticPort, diagnostics)
    if err != nil {
+
      log.Fatal(err)
    }
 }
 
 func hello(w http.ResponseWriter, r *http.Request) {
+  log.Print("The hello handler was called")
   fmt.Fprint(w, http.StatusText(http.StatusOK))
 }
